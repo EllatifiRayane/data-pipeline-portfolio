@@ -1,0 +1,16 @@
+[project]
+name = "data-pipeline-portfolio"
+version = "0.1.0"
+description = "End-to-end data pipeline — Python · Airflow · dbt · BigQuery"
+authors = [
+    {name = "Ellatifi Rayane",email = "rayane.ellatifi@outlook.fr"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
