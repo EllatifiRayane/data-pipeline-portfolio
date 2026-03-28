@@ -5,28 +5,28 @@ from unittest.mock import MagicMock
 
 def test_ingester_initialisation():
     """
-    Vérifie que l'ingester s'initialise correctement.
-    - La session HTTP est créée
-    - Le User-Agent est bien défini
-    - Le répertoire de sortie est correct
+    Check that the ingester initializes correctly.
+    - The HTTP session is created
+    - The User-Agent is set correctly
+    - The output directory is correct
     """
-    # ARRANGE & ACT — on crée l'ingester
+    # ARRANGE & ACT — We create the ingester
     ingester = OpenFoodFactsIngester()
 
-    # ASSERT — on vérifie l'état initial
+    # ASSERT — Check of the initial state
     assert ingester.session is not None
     assert "User-Agent" in ingester.session.headers
     assert "DataPipelinePortfolio" in ingester.session.headers["User-Agent"]
     assert ingester.output_dir.name == "products"
 
-def test_to_parquet_écrit_le_fichier(tmp_path, monkeypatch):
+def test_to_parquet_writes_file(tmp_path, monkeypatch):
     """
-    Vérifie que to_parquet() écrit correctement le fichier Parquet.
+    Check that to_parquet() writes the Parquet file correctly.
     
-    tmp_path — dossier temporaire créé par pytest, supprimé après le test
-    monkeypatch — permet de modifier temporairement des valeurs pendant le test
+    tmp_path — temporary directory created by pytest, deleted after the test
+    monkeypatch — allows you to temporarily modify values during the test
     """
-    # ARRANGE — données de test minimalistes
+    # ARRANGE — Sample data 
     products = [
         {"id": "1", "product_name": "Coca Cola", "brands": "Coca Cola"},
         {"id": "2", "product_name": "Pepsi", "brands": "Pepsi"},
@@ -34,8 +34,8 @@ def test_to_parquet_écrit_le_fichier(tmp_path, monkeypatch):
 
     ingester = OpenFoodFactsIngester()
 
-    # On redirige output_dir vers tmp_path
-    # pour ne pas polluer data/raw/ avec des données de test
+    # Redirect output_dir to tmp_path
+    # to avoid cluttering data/raw/ with test data
     monkeypatch.setattr(ingester, "output_dir", tmp_path)
 
     # ACT
@@ -49,12 +49,12 @@ def test_to_parquet_écrit_le_fichier(tmp_path, monkeypatch):
     assert len(df) == 2
     assert "ingested_at" in df.columns
 
-def test_run_ingestion_complète(tmp_path, monkeypatch):
+def test_run_full_ingestion(tmp_path, monkeypatch):
     """
-    Vérifie que run() orchestre correctement fetch → stockage.
-    On mocke _fetch_with_retry pour ne pas appeler vraiment l'API.
+    Check that run() correctly coordinates the fetch → storage process.
+    We mock _fetch_with_retry so that the API isn't actually called.
     """
-    # ARRANGE — on crée une fausse réponse HTTP
+    # ARRANGE — We fake a fake HTTP response
     fake_response = MagicMock()
     fake_response.status_code = 200
     fake_response.json.return_value = {
@@ -64,28 +64,29 @@ def test_run_ingestion_complète(tmp_path, monkeypatch):
             {"id": "3", "product_name": "Orangina", "brands": "Orangina"},
         ]
     }
-    # On crée l'ingester
+    # Ingester instanciation
     ingester = OpenFoodFactsIngester()
     
-    # On remplace _fetch_with_retry par notre fausse réponse
-    # à chaque appel de _fetch_with_retry, fake_response sera retourné
+    # We replace `fetch_with_retry` with our fake response
+    # Every time `fetch_with_retry` is called, `fake_response` will be returned
     monkeypatch.setattr(
         ingester,
         "_fetch_with_retry",
         lambda url: fake_response
     )
     
-    # On redirige output_dir vers tmp_path
+    # We redirect output_dir to tmp_path
     monkeypatch.setattr(ingester, "output_dir", tmp_path)
-    # ACT — on lance le pipeline complet
+    # ACT — Run of the pipeline
     ingester.run(n_pages=2)
 
-    # ASSERT — on vérifie que le fichier Parquet a bien été créé
+    # ASSERT — Check that the parquet file has been created
     parquet_files = list(tmp_path.rglob("*.parquet"))
-    
-    # On assert que cette liste contient exactement 1 fichier. 0 fichier -> Pas de data / +1 fichier = doublons
+     
+    # Verify the list contains exactly 1 file 
+    # 0 files means no data was written, 2+ files means duplicates
     assert len(parquet_files) == 1 
-    
+
     df = pd.read_parquet(parquet_files[0])
-    assert len(df) == 6  # 3 produits × 2 pages
+    assert len(df) == 6  # 3 products × 2 pages
     assert "ingested_at" in df.columns
