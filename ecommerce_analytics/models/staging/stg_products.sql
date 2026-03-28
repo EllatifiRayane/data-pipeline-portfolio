@@ -23,6 +23,7 @@ renamed AS (
     TIMESTAMP(ingested_at) AS ingested_at
 
     FROM source
+    WHERE id IS NOT NULL
 
 )
 
