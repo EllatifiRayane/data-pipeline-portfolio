@@ -6,11 +6,34 @@ authors = [
     {name = "Ellatifi Rayane", email = "rayane.ellatifi@outlook.fr"}
 ]
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<4.0"
 dependencies = [
+    "requests (>=2.33.0,<3.0.0)",
+    "pandas (>=3.0.1,<4.0.0)",
+    "pyarrow (>=23.0.1,<24.0.0)",
+    "python-dotenv (>=1.2.2,<2.0.0)",
+    "loguru (>=0.7.3,<0.8.0)"
 ]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+# E = erreurs style, F = erreurs logiques, I = ordre imports
+select = ["E", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+[dependency-groups]
+dev = [
+    "ruff (>=0.15.8,<0.16.0)",
+    "pytest (>=9.0.2,<10.0.0)",
+    "pytest-mock (>=3.15.1,<4.0.0)"
+]
