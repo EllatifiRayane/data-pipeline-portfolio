@@ -1,0 +1,17 @@
+models:
+  - name: dim_products
+    columns:
+      - name: product_id
+        data_tests:
+          - unique
+          - not_null
+      - name: product_name
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: nutriscore_grade
+        data_tests:
+          - accepted_values:
+              values: ['a', 'b', 'c', 'd', 'e', 'unknown', 'not-applicable']
+             
