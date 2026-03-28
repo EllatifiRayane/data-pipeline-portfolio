@@ -4,7 +4,7 @@ import os
 
 load_dotenv()
 
-# Chemins locaux
+# Local Path
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 RAW_DATA_DIR = BASE_DIR / "data" / "raw"
 
