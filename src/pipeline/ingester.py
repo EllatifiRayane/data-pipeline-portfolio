@@ -158,24 +158,27 @@ class OpenFoodFactsIngester:
         logger.success(f"{len(df)} products written → {filepath}")
         return filepath
 
-    def run(self, n_pages: int = 5) -> None:
+    def run(self, n_pages: int = 5) -> Path:  # None → Path
         """
         Main ingestion entry point.
         Orchestrates fetch → validation → storage.
 
         Args:
             n_pages: number of pages to ingest (100 products/page)
+
+        Returns:
+            Path: path to the written Parquet file
         """
         logger.info(f"Start ingestion — {n_pages} pages ({n_pages * 100} products)")
 
         products = self.fetch_products(n_pages=n_pages)
 
-        # Safety net — if the API returns 0 products, we exit gracefully
-        # rather than writing an empty Parquet file
         if not products:
             logger.warning("Zero products retrieved — stop ingestion")
-            return
+            return None  # ← retourne None si pas de produits
 
         filepath = self.to_parquet(products)
 
         logger.success(f"Ingestion done — {len(products)} products → {filepath}")
+
+        return filepath  # ← retourne le filepath
