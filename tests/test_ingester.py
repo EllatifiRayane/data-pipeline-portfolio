@@ -19,7 +19,7 @@ def test_ingester_initialisation():
     assert "DataPipelinePortfolio" in ingester.session.headers["User-Agent"]
     assert ingester.output_dir.name == "products"
 
-def test_to_parquet_écrit_le_fichier(tmp_path, monkeypatch):
+def test_to_parquet_writes_file(tmp_path, monkeypatch):
     """
     Vérifie que to_parquet() écrit correctement le fichier Parquet.
     
@@ -49,7 +49,7 @@ def test_to_parquet_écrit_le_fichier(tmp_path, monkeypatch):
     assert len(df) == 2
     assert "ingested_at" in df.columns
 
-def test_run_ingestion_complète(tmp_path, monkeypatch):
+def test_run_full_ingestion(tmp_path, monkeypatch):
     """
     Vérifie que run() orchestre correctement fetch → stockage.
     On mocke _fetch_with_retry pour ne pas appeler vraiment l'API.
@@ -85,7 +85,7 @@ def test_run_ingestion_complète(tmp_path, monkeypatch):
     
     # On assert que cette liste contient exactement 1 fichier. 0 fichier -> Pas de data / +1 fichier = doublons
     assert len(parquet_files) == 1 
-    
+
     df = pd.read_parquet(parquet_files[0])
     assert len(df) == 6  # 3 produits × 2 pages
     assert "ingested_at" in df.columns
