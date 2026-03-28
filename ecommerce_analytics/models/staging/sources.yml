@@ -1,0 +1,8 @@
+sources:
+  - name: ecommerce_raw
+    database: data-pipeline-portfolio
+    schema: ecommerce_raw
+    description: "Raw data ingested from Open Food Facts API"
+    tables:
+      - name: products
+        description: "Raw products data from Open Food Facts"
