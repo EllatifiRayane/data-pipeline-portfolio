@@ -1,5 +1,9 @@
 models:
   - name: stg_products
+    description: >
+      Staging model for raw products data.
+      Performs basic cleaning and normalization.
+      No business logic is applied.
     columns:
       - name: product_id
         data_tests:
@@ -14,4 +18,48 @@ models:
         data_tests:
           - accepted_values:
               values: ['a', 'b', 'c', 'd', 'e', 'unknown', 'not-applicable']
-             
+
+  - name: stg_orders
+    description: >
+      Staging model for raw orders data.
+      Performs basic cleaning, type casting, and normalization.
+      No business logic is applied.
+
+    columns:
+      - name: order_id
+        description: Unique identifier of the order
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: Unique identifier of the customer
+
+      - name: order_date
+        description: Parsed order date from multiple input formats
+        tests:
+          - not_null
+
+      - name: has_promo
+        description: Flag indicating if a promo was applied
+
+      - name: promo_code
+        description: Promo code used for the order (if any)
+
+      - name: discount
+        description: Discount amount applied to the order (%)
+
+      - name: status
+        description: Raw status value from source system (unstandardized)
+
+      - name: normalized_status
+        description: >
+          Standardized status value.
+          Derived from `status` using macro normalization (case, typos, variants).
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['DELIVERED', 'PENDING', 'CANCELLED', 'SHIPPED', 'UNKNOWN']
+
+      - name: channel
+        description: Acquisition channel of the order (App,mobile,desktop)
