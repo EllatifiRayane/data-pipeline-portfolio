@@ -6,4 +6,6 @@ sources:
     tables:
       - name: products
         description: "Raw products data from Open Food Facts"
+      - name: orders
+        description: "Raw orders data generated"
         
