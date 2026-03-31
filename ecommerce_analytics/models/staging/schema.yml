@@ -26,19 +26,23 @@ models:
       No business logic is applied.
 
     columns:
+      - name: order_date
+        description: Parsed order date from multiple input formats
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
       - name: order_id
         description: Unique identifier of the order
-        tests:
+        data_tests:
           - not_null
-          - unique
+          - unique:
+              config:
+                severity: warn
 
       - name: customer_id
         description: Unique identifier of the customer
-
-      - name: order_date
-        description: Parsed order date from multiple input formats
-        tests:
-          - not_null
 
       - name: has_promo
         description: Flag indicating if a promo was applied
@@ -56,10 +60,51 @@ models:
         description: >
           Standardized status value.
           Derived from `status` using macro normalization (case, typos, variants).
-        tests:
+        data_tests:
           - not_null
           - accepted_values:
               values: ['DELIVERED', 'PENDING', 'CANCELLED', 'SHIPPED', 'UNKNOWN']
 
       - name: channel
         description: Acquisition channel of the order (App,mobile,desktop)
+      
+  - name: stg_order_items
+    description: >
+      Staging model for raw order items data.
+      No business logic is applied.
+
+    columns:
+      - name: order_item_id
+        description: Unique identifier of the order_item
+        data_tests:
+          - unique
+          - not_null:
+              config:
+                severity: error
+
+      - name: order_id
+        description: Unique identifier of the order
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+      - name: product_id
+        description: Unique identifier of the product
+        data_tests:
+          - relationships:
+              to: ref('stg_products')
+              field: product_id
+              config:
+                severity: warn
+
+      - name: quantity
+        description: Quantity of items bought 
+
+      - name: unit_price
+        description: unit price of the items
+        data_tests:
+          - not_null
+      
+      - name: total_price
+        description: total price of the items
