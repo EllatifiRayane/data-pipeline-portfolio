@@ -51,7 +51,7 @@ models:
         description: Promo code used for the order (if any)
 
       - name: discount
-        description: Discount amount applied to the order (%)
+        description: Discount amount applied to the order (between 0 and 1)
 
       - name: status
         description: Raw status value from source system (unstandardized)
