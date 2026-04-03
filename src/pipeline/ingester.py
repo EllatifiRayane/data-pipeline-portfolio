@@ -74,7 +74,7 @@ class OpenFoodFactsIngester:
         # We only end up here if all other attempts have failed
         raise Exception(f"API unavailable after {max_retries} attempts")
 
-    def fetch_products(self, n_pages: int = 5) -> list[dict]:
+    def fetch_products(self, n_pages: int = 2) -> list[dict]:
         """
         Retrieves n_pages pages of products from the Open Food Facts API.
 
@@ -158,7 +158,7 @@ class OpenFoodFactsIngester:
         logger.success(f"{len(df)} products written → {filepath}")
         return filepath
 
-    def run(self, n_pages: int = 5) -> Path:  # None → Path
+    def run(self, n_pages: int = 2) -> Path:  # None → Path
         """
         Main ingestion entry point.
         Orchestrates fetch → validation → storage.
