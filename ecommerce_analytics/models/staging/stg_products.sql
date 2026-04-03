@@ -8,6 +8,15 @@ source as (
 
 ),
 
+deduplicated AS (
+    SELECT *,
+           ROW_NUMBER() OVER (
+               PARTITION BY id
+               ORDER BY last_modified_t DESC
+           ) AS row_num
+    FROM source
+),
+
 renamed AS (
 
     SELECT 
@@ -24,8 +33,8 @@ renamed AS (
     TIMESTAMP_SECONDS(last_modified_t) AS last_modified_at,
     TIMESTAMP(ingested_at) AS ingested_at
 
-    FROM source
-    WHERE id IS NOT NULL
+    FROM deduplicated
+    WHERE id IS NOT NULL and row_num = 1
 
 )
 
