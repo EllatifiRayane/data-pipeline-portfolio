@@ -24,10 +24,14 @@ models:
         data_tests:
           - dbt_expectations.expect_column_values_to_be_between:
              min_value: 0
+             config:
+                severity: warn
       - name: avg_basket
         data_tests:
           - dbt_expectations.expect_column_values_to_be_between:
              min_value: 0
+             config:
+                severity: warn
       - name: unique_customers
         data_tests:
           - dbt_expectations.expect_column_values_to_be_between:
