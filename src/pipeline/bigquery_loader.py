@@ -33,7 +33,7 @@ class BigQueryLoader:
             self.client.create_dataset(dataset_ref)
             logger.success(f"Dataset {self.dataset_id} created")
 
-    def load_parquet(self, filepath: Path, table_name: str) -> None:
+    def load_parquet(self, filepath: Path, table_name: str,  write_mode: str = "append",) -> None:
         """
         Loads a Parquet file into a BigQuery table.
         Creates the table automatically based on the Parquet schema.
@@ -43,6 +43,11 @@ class BigQueryLoader:
             table_name: target BigQuery table name
         """
         table_ref = f"{GCP_PROJECT_ID}.{self.dataset_id}.{table_name}"
+         # Map write modes
+        write_disposition = {
+            "append": bigquery.WriteDisposition.WRITE_APPEND,
+            "truncate": bigquery.WriteDisposition.WRITE_TRUNCATE,
+        }[write_mode]
 
         # Job configuration — how BigQuery should load the data
         job_config = bigquery.LoadJobConfig(
@@ -52,10 +57,10 @@ class BigQueryLoader:
             source_format=bigquery.SourceFormat.PARQUET,
             # WRITE_APPEND — adds data without deleting existing rows
             # Important for incremental loads — each day adds new rows
-            write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
+            write_disposition=write_disposition,
         )
 
-        logger.info(f"Loading {filepath} → {table_ref}")
+        logger.info(f"Loading {filepath} → {table_ref} (mode={write_mode})")
 
         with open(filepath, "rb") as f:
             job = self.client.load_table_from_file(
