@@ -295,7 +295,7 @@ class OrdersGenerator:
         return df
 
     def to_parquet(
-        self, orders_df: pd.DataFrame, order_items_df: pd.DataFrame
+        self, orders_df: pd.DataFrame, order_items_df: pd.DataFrame, customers_df: pd.DataFrame
     ) -> tuple[Path, Path]:
         """
         Write orders and order_items to partitioned Parquet files.
@@ -319,23 +319,75 @@ class OrdersGenerator:
             f"{len(order_items_df)} order items written → {order_items_filepath}"
         )
 
-        return orders_filepath, order_items_filepath
+        # Customers
+        customers_path = self.output_dir / "customers" / partition
+        customers_path.mkdir(parents=True, exist_ok=True)
+        customers_filepath = customers_path / "data.parquet"
+        customers_df.to_parquet(customers_filepath, index=False)
+        logger.success(f"{len(customers_df)} customers written → {customers_filepath}")
 
-    def run(self) -> tuple[Path, Path]:
+        return orders_filepath, order_items_filepath, customers_filepath
+    
+    def generate_customers(self) -> pd.DataFrame:
+        """
+        Generate all customers based on customer segments.
+        Registration date is coherent with order history.
+        """
+        all_customers = []
+
+        segments = [
+            (self.loyal_customers, "loyal"),
+            (self.occasional_customers, "occasional"),
+            (self.one_shot_customers, "one_shot"),
+        ]
+
+        for customer_ids, segment in segments:
+            for customer_id in customer_ids:
+                # Registration date between 2016 and 2023
+                # Always before first possible order (2017)
+                registration_date = fake.date_between(
+                    start_date=datetime(2016, 1, 1),
+                    end_date=datetime(2023, 12, 31),
+                )
+
+                all_customers.append({
+                    "customer_id": customer_id,
+                    "first_name": fake.first_name(),
+                    "last_name": fake.last_name(),
+                    "email": fake.email(),
+                    "birth_date": fake.date_of_birth(
+                        minimum_age=18,
+                        maximum_age=75
+                    ).isoformat(),
+                    "gender": random.choice(["M", "F", "Non-binary"]),
+                    "city": fake.city(),
+                    "country": "France",
+                    "registration_date": registration_date.isoformat(),
+                    "customer_segment": segment,
+                })
+
+        df = pd.DataFrame(all_customers)
+        logger.info(f"Total customers generated : {len(df)}")
+        return df
+
+    def run(self) -> tuple[Path, Path, Path]:
         """
         Main entry point — orchestrates generation and storage.
         """
-        logger.info("Starting orders generation")
+        logger.info("Starting data generation")
 
+        customers_df = self.generate_customers()
         orders_df = self.generate_orders()
         order_items_df = self.generate_order_items(orders_df)
-        orders_filepath, order_items_filepath = self.to_parquet(
-            orders_df, order_items_df
+        orders_filepath, order_items_filepath, customers_filepath = self.to_parquet(
+            orders_df, order_items_df, customers_df
         )
 
         logger.success(
             f"Generation complete — "
-            f"{len(orders_df)} orders | {len(order_items_df)} order items"
+            f"{len(orders_df)} orders | "
+            f"{len(order_items_df)} order items | "
+            f"{len(customers_df)} customers"
         )
 
-        return orders_filepath, order_items_filepath
+        return orders_filepath, order_items_filepath, customers_filepath
