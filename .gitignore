@@ -217,3 +217,10 @@ data/processed/
 credentials/
 *.json
 service-account*.json
+
+#logs 
+logs/
+
+#airflow 
+airflow.db
+airflow.db-wal
