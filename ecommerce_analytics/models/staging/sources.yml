@@ -10,4 +10,6 @@ sources:
         description: "Raw orders data generated"
       - name: order_items
         description: "Raw order items data generated"
+      - name: customers 
+        description: "Raw customers information data generated"
         
