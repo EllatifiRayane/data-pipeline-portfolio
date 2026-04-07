@@ -16,3 +16,6 @@ API_PAGE_SIZE = 100
 # GCP
 GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID")
 BIGQUERY_DATASET = os.getenv("BIGQUERY_DATASET", "ecommerce_raw")
+
+#GCS
+GCS_BUCKET = os.getenv("GCS_BUCKET")
