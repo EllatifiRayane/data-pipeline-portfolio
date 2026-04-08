@@ -224,3 +224,4 @@ logs/
 #airflow 
 airflow.db
 airflow.db-wal
+airflow.cfg
