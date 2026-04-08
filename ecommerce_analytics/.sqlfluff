@@ -1,0 +1,29 @@
+[sqlfluff]
+dialect = bigquery
+templater = jinja
+sql_file_exts = .sql
+max_line_length = 100
+ignore_templated_error = True
+
+# Style
+indent_unit = space
+tab_space_size = 4
+
+[sqlfluff:indentation]
+indent_tabs = False
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.functions]
+capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.literals]
+capitalisation_policy = upper
+
+[sqlfluff:rules:layout.commas]
+line_position = trailing
+
+[sqlfluff:rules]
+exclude_rules = TMP,PRS
+

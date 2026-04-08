@@ -8,7 +8,7 @@ source AS (
 
 )
 
-SELECT 
+SELECT
     order_item_id,
     order_id,
     product_id,

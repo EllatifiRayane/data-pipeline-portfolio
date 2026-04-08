@@ -1,26 +1,30 @@
-{{ config(materialized='view') }}
+{{
+  config(
+    materialized = "view"
+  )
+}}
 
-with
+WITH
 
-source as (
+source AS (
 
-    select * from {{ source('ecommerce_raw','orders') }}
+    SELECT * FROM {{ source('ecommerce_raw','orders') }}
 
 )
 
-SELECT 
+SELECT
     order_id,
     customer_id,
-    coalesce(
-    date(safe.parse_timestamp('%Y-%m-%dT%H:%M:%E*S', order_date)),
-    safe.parse_date('%Y-%m-%d', order_date),
-    safe.parse_date('%d/%m/%Y', order_date),
-    safe.parse_date('%m-%d-%Y', order_date)
-            ) as order_date,
+    COALESCE(
+        DATE(safe.parse_timestamp('%Y-%m-%dT%H:%M:%E*S', order_date)),
+        safe.parse_date('%Y-%m-%d', order_date),
+        safe.parse_date('%d/%m/%Y', order_date),
+        safe.parse_date('%m-%d-%Y', order_date)
+    ) AS order_date,
     has_promo,
     promo_code,
     discount,
-    status,
-   {{ normalize_status('status') }} AS normalized_status,
+    source.status,
+    {{ normalize_status('status') }} AS normalized_status,
     channel
 FROM source

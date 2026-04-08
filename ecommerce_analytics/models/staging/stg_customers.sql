@@ -8,7 +8,7 @@ source AS (
 
 )
 
-SELECT 
+SELECT
     customer_id,
     first_name,
     last_name,
@@ -16,7 +16,7 @@ SELECT
     city,
     country,
     email,
+    customer_segment,
     CAST(birth_date AS DATE) AS birth_date,
-    CAST(registration_date AS DATE) AS registration_date,
-    customer_segment
+    CAST(registration_date AS DATE) AS registration_date
 FROM source
