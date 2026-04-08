@@ -7,8 +7,9 @@ services:
     environment:
       AIRFLOW__CORE__EXECUTOR: SequentialExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      AIRFLOW__CORE__FERNET_KEY: "jRrAA1efytzQyG9DwXyBOXxc9VQ2pKRdRutylhm13S8="
-      AIRFLOW__WEBSERVER__SECRET_KEY: "random_secret_key"
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW__API__SECRET_KEY}
       GOOGLE_CLOUD_PROJECT: data-pipeline-portfolio
       GCP_PROJECT_ID: data-pipeline-portfolio
       PYTHONPATH: /opt/airflow
