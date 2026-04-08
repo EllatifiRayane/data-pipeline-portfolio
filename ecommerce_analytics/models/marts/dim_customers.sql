@@ -15,8 +15,8 @@ WITH enriched AS (
         email,
         customer_segment,
         birth_date,
-        DATE_DIFF(CURRENT_DATE(), birth_date, YEAR) AS age,
         registration_date,
+        DATE_DIFF(CURRENT_DATE(), birth_date, YEAR) AS age,
         DATE_DIFF(CURRENT_DATE(), registration_date, DAY) AS customer_tenure_days
     FROM {{ ref('stg_customers') }}
 )
