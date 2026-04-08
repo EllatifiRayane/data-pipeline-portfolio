@@ -1,0 +1,14 @@
+ecommerce_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: data-pipeline-portfolio
+      dataset: ecommerce
+      location: EU
+      threads: 4
+      keyfile: /opt/airflow/keys/gcp.json   # 🔥 IMPORTANT
+      job_execution_timeout_seconds: 300
+      job_retries: 1
+      priority: interactive
