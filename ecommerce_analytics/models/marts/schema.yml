@@ -41,4 +41,43 @@ models:
           - dbt_expectations.expect_column_values_to_be_between:
              min_value: 2017
              
-      
+  - name: mart_customer_retention
+    description: >
+      Matrice de rétention par cohorte mensuelle.
+      Chaque ligne = une cohorte × une période.
+      Permet d'analyser le taux de rétention, le churn et le LTV cumulé.
+    columns:
+      - name: cohort_month
+        description: Mois du premier achat de la cohorte (DATE tronquée au mois)
+        tests:
+          - not_null
+      - name: period_number
+        description: Nombre de mois écoulés depuis la cohorte (0 = mois d'acquisition)
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 120 ## (10 ans)
+      - name: cohort_nb_customers
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+      - name: retention_rate
+        description: active_customers / cohort_size
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1
+              config:
+                severity: warn
+      - name: churn_rate
+        description: cohort_size - active_customer / cohort_size
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0  
+              max_value: 1.0
+              config:
+                severity: warn
+
+ 
