@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: poetry install
+        working-directory: ecommerce_analytics
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: SQLFluff lint
+        run: poetry run sqlfluff lint models/
+        working-directory: ecommerce_analytics
+
+      - name: dbt compile
+        run: poetry run dbt compile
+        working-directory: ecommerce_analytics
+
+      - name: dbt test
+        run: poetry run dbt test
+        working-directory: ecommerce_analytics
