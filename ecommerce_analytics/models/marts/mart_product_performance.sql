@@ -9,26 +9,27 @@
 
 WITH product_monthly AS (
 
-    SELECT 
+    SELECT
         soi.product_id,
         DATE_TRUNC(io.order_date, MONTH) AS order_month,
 
         -- Core metrics
         SUM(soi.unit_price * soi.quantity) AS monthly_revenue,
-        SUM(soi.quantity)                  AS units_sold,
-        COUNT(DISTINCT soi.order_id)       AS nb_orders,
+        SUM(soi.quantity) AS units_sold,
+        COUNT(DISTINCT soi.order_id) AS nb_orders,
 
         SAFE_DIVIDE(
             SUM(soi.unit_price * soi.quantity),
             SUM(soi.quantity)
         ) AS avg_unit_price
 
-    FROM {{ ref('stg_order_items') }} soi
-    JOIN {{ ref('int_orders') }} io
-        USING (order_id)
+    FROM {{ ref('stg_order_items') }} AS soi
+    INNER JOIN {{ ref('int_orders') }} AS io
+        ON soi.order_id = io.order_id
 
-    WHERE io.normalized_status = 'DELIVERED'
-      AND io.order_date IS NOT NULL
+    WHERE
+        io.normalized_status = 'DELIVERED'
+        AND io.order_date IS NOT NULL
 
     GROUP BY 1, 2
 
@@ -50,7 +51,7 @@ product_enriched AS (
             PARTITION BY product_id, EXTRACT(YEAR FROM order_month)
         ) AS annual_revenue
 
-    FROM product_monthly pm
+    FROM product_monthly AS pm
 
 ),
 
@@ -79,15 +80,11 @@ final AS (
         ) AS seasonal_index,
 
         -- Flags (dashboard ready 💥)
-        CASE
-            WHEN SAFE_DIVIDE(
-                monthly_revenue - prev_revenue,
-                prev_revenue
-            ) > 0.35
-            AND monthly_revenue > 1000
-            THEN TRUE
-            ELSE FALSE
-        END AS is_high_growth
+        COALESCE(SAFE_DIVIDE(
+            monthly_revenue - prev_revenue,
+            prev_revenue
+        ) > 0.35
+        AND monthly_revenue > 1000, FALSE) AS is_high_growth
 
     FROM product_enriched
 
