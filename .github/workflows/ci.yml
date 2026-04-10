@@ -50,6 +50,10 @@ jobs:
       - name: SQLFluff lint
         run: poetry run sqlfluff lint models/
         working-directory: ecommerce_analytics
+      
+      - name: dbt deps
+        run: poetry run dbt deps
+        working-directory: ecommerce_analytics
 
       - name: dbt compile
         run: poetry run dbt compile
