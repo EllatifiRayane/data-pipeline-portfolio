@@ -29,6 +29,23 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+      
+      - name: Create dbt profiles
+        run: |
+          mkdir -p ~/.dbt
+          cat <<EOF > ~/.dbt/profiles.yml
+          ecommerce_analytics:
+            outputs:
+              dev:
+                type: bigquery
+                method: service-account-json
+                project: data-pipeline-portfolio
+                dataset: ecommerce
+                location: EU
+                threads: 4
+                keyfile_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+            target: dev
+          EOF
 
       - name: SQLFluff lint
         run: poetry run sqlfluff lint models/
