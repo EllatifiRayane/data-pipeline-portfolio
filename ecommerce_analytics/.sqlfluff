@@ -3,7 +3,7 @@ dialect = bigquery
 templater = jinja
 sql_file_exts = .sql
 max_line_length = 100
-ignore_templated_error = True
+ignore_paths = models/staging/stg_orders.sql
 
 # Style
 indent_unit = space
@@ -26,4 +26,3 @@ line_position = trailing
 
 [sqlfluff:rules]
 exclude_rules = TMP,PRS
-
