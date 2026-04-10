@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'ecommerce_analytics/models/**'
+      - 'ecommerce_analytics/macros/**'
+      - 'ecommerce_analytics/seeds/**'
+      - 'ecommerce_analytics/tests/**'
+      - 'ecommerce_analytics/packages.yml'
+      - 'ecommerce_analytics/dbt_project.yml'
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 🔥 Cache Poetry (Python deps)
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pypoetry
+          key: poetry-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      # 🔥 Cache dbt packages
+      - name: Cache dbt packages
+        uses: actions/cache@v3
+        with:
+          path: ecommerce_analytics/dbt_packages
+          key: dbt-${{ hashFiles('ecommerce_analytics/packages.yml') }}
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: poetry install
+        working-directory: ecommerce_analytics
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+      
+      - name: Create dbt profiles
+        run: |
+          mkdir -p ~/.dbt
+          cat <<EOF > ~/.dbt/profiles.yml
+          ecommerce_analytics:
+            outputs:
+              dev:
+                type: bigquery
+                method: service-account-json
+                project: data-pipeline-portfolio
+                dataset: ecommerce
+                location: EU
+                threads: 4
+                keyfile_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+            target: dev
+          EOF
+
+      - name: SQLFluff lint
+        run: poetry run sqlfluff lint models/
+        working-directory: ecommerce_analytics
+      
+      - name: dbt deps
+        run: poetry run dbt deps
+        working-directory: ecommerce_analytics
+
+      - name: dbt compile
+        run: poetry run dbt compile
+        working-directory: ecommerce_analytics
+
+      - name: dbt test
+        run: poetry run dbt test
+        working-directory: ecommerce_analytics
